@@ -24,7 +24,7 @@ online_status.onclose = function(e) {
 
 online_status.onmessage = function(e) {
     var data = JSON.parse(e.data);
-    if (data.username) {
+    if (data.username && data.username != loggedin_user) {
         var user_to_change = document.getElementById(`${data.username}_status`)
         var small_status_to_change = document.getElementById(`${data.username}_small`)
         if (data.online_status == true) {

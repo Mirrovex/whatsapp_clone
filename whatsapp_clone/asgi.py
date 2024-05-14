@@ -13,7 +13,7 @@ from django.urls import path
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 
-from chat.consumers import PersonalChatConsumer, OnlineStatusConsumer
+from chat.consumers import PersonalChatConsumer, OnlineStatusConsumer, NotificationConsumer
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'whatsapp_clone.settings')
 
@@ -23,6 +23,7 @@ application = ProtocolTypeRouter({
         URLRouter([
             path('ws/<int:id>/', PersonalChatConsumer.as_asgi()),
             path('ws/online/', OnlineStatusConsumer.as_asgi()),
+            path('ws/notify/', NotificationConsumer.as_asgi()),
         ])
     )
 })

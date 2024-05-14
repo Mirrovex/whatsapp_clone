@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 
+from chat.models import UserProfile
+
 User = get_user_model()
 
 
@@ -14,10 +16,10 @@ def register(request):
 
         if form.is_valid():
             new_user = form.save()
-            new_user = authenticate(username=form.cleaned_data['username'],
-                                    password=form.cleaned_data['password1'],
-                                    )
+            new_user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password1'])
             login(request, new_user)
+
+            UserProfile.objects.create(user=new_user, name=form.cleaned_data['username'])
 
             return HttpResponseRedirect(reverse('home'))
 
@@ -36,17 +38,20 @@ def loginView(request):
         password = request.POST.get('password')
 
         user = authenticate(request, username=username, password=password)
-
         if user:
             if user.is_active:
                 login(request, user)
+
+                # user_profile = UserProfile.objects.get(user=user)
+                # user_profile.online_status = True
+                # user_profile.save(update_fields='online_status')
+
                 return HttpResponseRedirect(reverse('home'))
             else:
                 return HttpResponse("Account Not Active")
         else:
             context = {'notfound': True}
-            print(
-                f"NO ACCOUNT FOUND WITH USERNAME {username} AND PASSWORD {password}")
+            print(f"NO ACCOUNT FOUND WITH USERNAME {username} AND PASSWORD {password}")
             print(context)
             return render(request, 'accounts/login.html', context)
 

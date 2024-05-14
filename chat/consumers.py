@@ -2,7 +2,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 
-from chat.models import Chat, UserProfile
+from chat.models import Chat, UserProfile, ChatNotification
 from django.contrib.auth.models import User
 
 
@@ -35,8 +35,9 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         message = data["message"]
         username = data["username"]
+        receiver = data["receiver"]
 
-        await self.save_message(username, self.room_group_name, message)
+        await self.save_message(username, self.room_group_name, message, receiver)
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -56,8 +57,40 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
         }))
 
     @database_sync_to_async
-    def save_message(self, username, thread_name, message):
-        Chat.objects.create(sender=username, message=message, thread_name=thread_name)
+    def save_message(self, username, thread_name, message, receiver):
+        chat = Chat.objects.create(sender=username, message=message, thread_name=thread_name)
+
+        other_user_id = self.scope["url_route"]["kwargs"]["id"]
+        user = User.objects.get(id=other_user_id)
+        if receiver == user.username:
+            ChatNotification.objects.create(chat=chat, user=user)
+
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+
+    async def connect(self):
+        current_user_id = self.scope["user"].id
+        self.room_group_name = f"{current_user_id}"
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+
+    async def disconnect(self, code):
+        self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    async def send_notification(self, event):
+        data = json.loads(event.get('value'))
+        count = data['count']
+        
+        await self.send(text_data=json.dumps({
+            'count': count
+        }))
 
 
 class OnlineStatusConsumer(AsyncWebsocketConsumer):
