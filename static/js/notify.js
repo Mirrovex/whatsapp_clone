@@ -1,5 +1,13 @@
+var ws_protocol = null
+
+if (window.location.protocol == 'https:') {
+    ws_protocol = 'wss://'
+} else {
+    ws_protocol = 'ws://'
+}
+
 const notify_socket = new WebSocket(
-    'ws://' + window.location.host + '/ws/notify/'
+    ws_protocol + window.location.host + '/ws/notify/'
 )
 
 notify_socket.onopen = function(e) {
