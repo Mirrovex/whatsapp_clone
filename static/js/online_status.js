@@ -1,11 +1,5 @@
 const loggedin_user = JSON.parse(document.getElementById('json-message-username').textContent);
-var ws_protocol = null
-
-if (window.location.protocol == 'https:') {
-    ws_protocol = 'wss://'
-} else {
-    ws_protocol = 'ws://'
-}
+ws_protocol = window.location.protocol == 'https:' ? 'wss://' : 'ws://'
 
 const online_status = new WebSocket(
     ws_protocol + window.location.host + '/ws/online/'

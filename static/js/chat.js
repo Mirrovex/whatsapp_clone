@@ -1,13 +1,7 @@
 const id = JSON.parse(document.getElementById('json-username').textContent);
 const message_username = JSON.parse(document.getElementById('json-message-username').textContent);
 const receiver = JSON.parse(document.getElementById('json-username-receiver').textContent);
-var ws_protocol = null
-
-if (window.location.protocol == 'https:') {
-    ws_protocol = 'wss://'
-} else {
-    ws_protocol = 'ws://'
-}
+ws_protocol = window.location.protocol == 'https:' ? 'wss://' : 'ws://'
 
 const socket = new WebSocket(
     ws_protocol + window.location.host + '/ws/' + id + "/"

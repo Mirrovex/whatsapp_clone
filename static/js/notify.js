@@ -1,10 +1,4 @@
-var ws_protocol = null
-
-if (window.location.protocol == 'https:') {
-    ws_protocol = 'wss://'
-} else {
-    ws_protocol = 'ws://'
-}
+ws_protocol = window.location.protocol == 'https:' ? 'wss://' : 'ws://'
 
 const notify_socket = new WebSocket(
     ws_protocol + window.location.host + '/ws/notify/'
